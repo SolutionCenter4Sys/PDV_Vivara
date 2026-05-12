@@ -1,0 +1,235 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --vv-coral-light-01: #fde1d5;
+    --vv-coral-light-02: #feede4;
+    --vv-coral-01: #ffa687;
+    --vv-coral-dark-01: #f09c75;
+    --vv-coral-dark-02: #f08769;
+    --vv-ink-7: #171a1c;
+    --vv-ink-6: #3e3e3e;
+    --vv-ink-5: #737373;
+    --vv-border: #d2d2d2;
+  }
+
+  html, body, #root {
+    height: 100%;
+  }
+
+  body {
+    @apply font-sans text-ink-7 bg-white antialiased;
+    letter-spacing: 0.01em;
+    /* iOS PWA standalone · respeita notch e home indicator */
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Touch action otimizado · evita 300ms delay e double-tap zoom acidental em CTAs */
+  button, a, [role="button"] {
+    touch-action: manipulation;
+  }
+
+  /* Step 7 fix · Foco visível WCAG 2.2 AA · 3px coral ring */
+  *:focus-visible {
+    outline: 2px solid var(--vv-coral-dark-02);
+    outline-offset: 2px;
+  }
+
+  /* Step 7 fix · Skip to content (a11y) */
+  .skip-to-content {
+    @apply absolute left-2 top-2 -translate-y-20 focus:translate-y-0
+           bg-ink-7 text-white px-4 py-2 z-50 text-[11px] uppercase tracking-cta font-bold
+           transition-transform;
+  }
+
+  /* Step 7 fix · Field group */
+  .field {
+    @apply block w-full;
+  }
+  .field label {
+    @apply block text-[11px] uppercase tracking-label font-bold text-ink-7 mb-2;
+  }
+  .field .err {
+    @apply block text-[11px] text-danger mt-2 leading-snug;
+  }
+}
+
+@layer components {
+  /* Botões oficiais Vivara */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-7 py-3 min-h-[48px]
+           font-medium text-xs uppercase tracking-cta
+           transition-all duration-200 cursor-pointer select-none
+           disabled:bg-ink-2 disabled:text-ink-4 disabled:cursor-not-allowed disabled:border-ink-2;
+  }
+  .btn-primary {
+    @apply btn bg-coral-200 text-ink-7 border border-coral-200
+           hover:bg-coral-400 hover:border-coral-400
+           active:bg-coral-500 active:border-coral-500;
+  }
+  .btn-secondary {
+    @apply btn bg-white text-ink-7 border border-ink-7
+           hover:bg-ink-7 hover:text-white;
+  }
+  .btn-tertiary {
+    @apply btn bg-transparent text-ink-7 underline border-none
+           hover:text-coral-500;
+  }
+  .btn-danger {
+    @apply btn bg-danger text-white border border-danger
+           hover:bg-red-800;
+  }
+  .btn-success {
+    @apply btn bg-success text-white border border-success
+           hover:bg-teal-800;
+  }
+  .btn-sm {
+    @apply px-5 py-2 min-h-[36px] text-[11px];
+  }
+  .btn-lg {
+    @apply px-9 py-4 min-h-[56px] text-[13px];
+  }
+
+  /* Inputs Vivara */
+  .input {
+    @apply w-full px-4 py-3 min-h-[48px]
+           font-sans text-base text-ink-7
+           bg-white border border-border
+           focus:outline-none focus:border-ink-7
+           placeholder:text-ink-4
+           rounded-none transition-colors;
+  }
+  .input-error {
+    @apply border-danger focus:border-danger;
+  }
+
+  /* Tag */
+  .tag {
+    @apply inline-block px-2.5 py-1 text-[10px] uppercase tracking-label font-bold;
+  }
+  .tag-coral { @apply tag bg-coral-200 text-ink-7; }
+  .tag-gold { @apply tag bg-gold text-white; }
+  .tag-life { @apply tag bg-life text-white; }
+  .tag-success { @apply tag bg-success text-white; }
+  .tag-warning { @apply tag bg-warning text-white; }
+  .tag-danger { @apply tag bg-danger text-white; }
+  .tag-outline { @apply tag bg-transparent border border-ink-7 text-ink-7; }
+
+  /* Card */
+  .card {
+    @apply bg-white border border-border;
+  }
+
+  /* Section title (serif Vivara) */
+  .heading-serif {
+    @apply font-serif font-semibold text-ink-7 leading-tight;
+    letter-spacing: -0.5px;
+  }
+
+  /* Connection badge */
+  .conn-badge {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 text-[11px] font-bold uppercase tracking-cta;
+  }
+
+  /* Scroll Bar */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: #f8f8f8; }
+  ::-webkit-scrollbar-thumb { background: #c7ccd1; }
+  ::-webkit-scrollbar-thumb:hover { background: #9099a2; }
+
+  /* Animations */
+  .reveal {
+    animation: reveal 0.4s ease-out;
+  }
+}
+
+@keyframes reveal {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in {
+  from { opacity: 0; transform: translateX(-12%); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* ============================================================
+ * Print stylesheet · NFC-e e comprovantes
+ * Foursys · responsividade Onda 1 (Gap #10)
+ * ============================================================ */
+@media print {
+  /* Esconde tudo que é UI de aplicação */
+  header,
+  footer,
+  aside,
+  nav,
+  .skip-to-content,
+  .reveal,
+  button,
+  [role="dialog"] {
+    display: none !important;
+  }
+
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  main {
+    padding: 0 !important;
+  }
+
+  /* Receipt card · 80mm térmico ou A4 */
+  .receipt {
+    max-width: 80mm;
+    margin: 0 auto;
+    padding: 8mm;
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 11pt;
+    line-height: 1.45;
+    color: #000;
+    page-break-after: always;
+  }
+
+  .receipt h1,
+  .receipt h2,
+  .receipt h3 {
+    font-family: inherit !important;
+    color: #000 !important;
+  }
+
+  /* Reseta cores · printers preto/branco economizam tinta */
+  * {
+    color: #000 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border-color: #000 !important;
+  }
+
+  a,
+  a:visited {
+    color: #000 !important;
+    text-decoration: none !important;
+  }
+
+  /* Quebras controladas */
+  h1, h2, h3, h4 {
+    page-break-after: avoid;
+  }
+  table, figure {
+    page-break-inside: avoid;
+  }
+
+  @page {
+    margin: 12mm;
+  }
+}
