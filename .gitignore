@@ -38,3 +38,6 @@ Thumbs.db
 
 # Opcional — deploy/hosting locais
 .vercel
+
+# Artefatos temporários · scripts auxiliares para gerar mocks (JSONs grandes do VTEX)
+.tmp_vtex/

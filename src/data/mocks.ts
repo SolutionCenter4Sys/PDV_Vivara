@@ -10,6 +10,7 @@ import type {
   ServiceOrder,
   CopilotNudge,
 } from '@/types';
+import { productsExtra } from './productsExtra';
 
 // =====================
 // SELLERS
@@ -66,11 +67,12 @@ export const sellers: Seller[] = [
 ];
 
 // =====================
-// PRODUTOS · 36 itens · imagens reais Vivara CDN
+// PRODUTOS · base curada (36 itens manuais) + 100 importados do catálogo VTEX
+// Total exposto via `products` = 136 SKUs reais Vivara/Life
 // =====================
 const VIVARA_CDN = 'https://lojavivara.vteximg.com.br/arquivos/ids';
 
-export const products: Product[] = [
+const productsCore: Product[] = [
   // ======= ANÉIS =======
   {
     id: 'P-001',
@@ -793,6 +795,9 @@ export const products: Product[] = [
     tag: 'limitada',
   },
 ];
+
+// Catálogo final · cura manual (P-001..P-036) + extras importados do VTEX (P-101+, LF-001+)
+export const products: Product[] = [...productsCore, ...productsExtra];
 
 // =====================
 // CLIENTES · 14 itens
