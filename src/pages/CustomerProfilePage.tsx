@@ -133,7 +133,11 @@ export function CustomerProfilePage() {
 
   const handleStartAttendance = () => {
     selectCustomer(customer);
-    navigate(tp('/catalogo'));
+    // EP-03 · Iniciar atendimento volta para a Home (rotulada "Atendimento" no
+    // Breadcrumb), onde o card "Atendimento ativo" aparece com o cliente
+    // vinculado e o Agente IA dispara nudges contextuais. A partir dali o
+    // vendedor decide se vai ao catalogo, wishlist, etc.
+    navigate(tp('/'));
   };
 
   const handleAddWishlistItem = (productId: string) => {
