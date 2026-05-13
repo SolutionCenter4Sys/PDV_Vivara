@@ -105,7 +105,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-30 bg-white border-b border-border">
-      <div className="max-w-grid-wide mx-auto px-4 lg:px-8 h-[80px] flex items-center justify-between gap-4">
+      <div className="max-w-grid-wide mx-auto px-3 md:px-4 lg:px-6 xl:px-8 h-[80px] flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -117,7 +117,11 @@ export function Header() {
           >
             <Menu size={18} aria-hidden="true" />
           </button>
-          <Link to={tp('/')} className="flex items-center gap-3 min-w-0">
+          <Link
+            to={tp('/')}
+            className="flex items-center gap-3 min-w-0"
+            title={seller?.storeName ? `PDV · ${seller.storeName}` : undefined}
+          >
             <span
               className={clsx(
                 'font-serif text-2xl md:text-3xl tracking-[0.5em] uppercase font-semibold whitespace-nowrap',
@@ -126,9 +130,8 @@ export function Header() {
             >
               {brand === 'vivara' ? 'Vivara' : 'Life'}
             </span>
-            <span className="hidden md:inline-block lg:hidden xl:inline-block text-[10px] uppercase tracking-label text-ink-5 font-bold border-l border-border pl-3 truncate max-w-[180px]">
-              PDV · {seller?.storeName}
-            </span>
+            {/* Nome da loja segue acessível via title (tooltip) e via Header drawer/Home;
+                removido do header para liberar largura horizontal nas viewports lg/xl. */}
           </Link>
         </div>
 
@@ -156,14 +159,14 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-2 md:gap-3">
+        <div className="flex items-center gap-1.5 md:gap-2">
           <BrandSwitcher />
           <MposBadge />
           <ConnectionBadge />
           <button
             type="button"
             onClick={() => setScanOpen(true)}
-            className="hidden md:inline-flex items-center gap-2 px-3 py-2 min-h-[44px] text-[11px] uppercase tracking-cta font-bold border border-ink-7 text-ink-7 hover:bg-ink-7 hover:text-white transition"
+            className="hidden md:inline-flex items-center gap-1.5 px-2.5 xl:px-3 py-2 min-h-[44px] text-[11px] uppercase tracking-cta font-bold border border-ink-7 text-ink-7 hover:bg-ink-7 hover:text-white transition"
             title="Identificar cliente · QR / CPF / busca"
             aria-label="Identificar cliente · scan QR ou busca"
           >
@@ -174,7 +177,7 @@ export function Header() {
           <button
             type="button"
             onClick={toggleCopilot}
-            className="hidden md:inline-flex items-center gap-2 px-3 py-2 min-h-[44px] text-[11px] uppercase tracking-cta font-bold bg-coral-50 text-coral-500 hover:bg-coral-100 transition"
+            className="hidden md:inline-flex items-center gap-1.5 px-2.5 xl:px-3 py-2 min-h-[44px] text-[11px] uppercase tracking-cta font-bold bg-coral-50 text-coral-500 hover:bg-coral-100 transition"
             title="Agente IA · Living Intelligence"
             aria-label="Abrir painel do Agente IA"
           >
