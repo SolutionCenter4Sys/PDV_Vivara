@@ -36,11 +36,16 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 export function ProductPage() {
-  const { sku } = useParams();
+  // A rota está declarada como `produto/:id` (VendasRoutes), porém o slug
+  // que gravamos na URL é o SKU (ProductCard linka /produto/${product.sku}).
+  // Usamos o mesmo valor para procurar primeiro por SKU e, em fallback,
+  // por id interno — assim qualquer link legado segue funcionando.
+  const params = useParams();
+  const slug = params.id ?? params.sku;
   const navigate = useNavigate();
   const tp = useTenantPath();
   const { addToCart } = usePosStore();
-  const product = getProductBySku(sku) || getProductById(sku ?? '');
+  const product = getProductBySku(slug) || getProductById(slug ?? '');
   const [storesOpen, setStoresOpen] = useState(false);
   const [radiusKm, setRadiusKm] = useState<number>(50); // EP-02-F1 filtros
   const [showCD, setShowCD] = useState(true);

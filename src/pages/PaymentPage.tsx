@@ -181,8 +181,8 @@ export function PaymentPage() {
       <div className="max-w-2xl mx-auto py-12 reveal">
         <Breadcrumb
           items={[
-            { label: 'Carrinho', to: '/carrinho' },
-            { label: 'Pagamento', to: '/pagamento' },
+            { label: 'Carrinho', to: tp('/carrinho') },
+            { label: 'Pagamento', to: tp('/pagamento') },
             { label: 'Venda concluída' },
           ]}
         />
@@ -273,7 +273,7 @@ export function PaymentPage() {
     <div className="space-y-8 reveal">
       <Breadcrumb
         items={[
-          { label: 'Carrinho', to: '/carrinho' },
+          { label: 'Carrinho', to: tp('/carrinho') },
           { label: 'Pagamento' },
         ]}
       />

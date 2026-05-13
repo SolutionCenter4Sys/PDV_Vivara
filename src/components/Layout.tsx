@@ -3,14 +3,18 @@ import { Toaster } from 'sonner';
 import { Header } from './Header';
 import { CopilotPanel } from './CopilotPanel';
 import { OfflineBanner } from './OfflineBanner';
+import { SalesBagBar } from './SalesBagBar';
 import { useNocSimulator } from '@/hooks/useNocSimulator';
 import { useAppSelector } from '@app/store/hooks';
 import { useBrandTheme } from '@/presentation/hooks/useBrandTheme';
+import { usePosStore } from '@/store/usePosStore';
 
 export function Layout() {
   useNocSimulator();
   useBrandTheme();
   const tenant = useAppSelector((s) => s.tenant.active);
+  const cartCount = usePosStore((s) => s.cartCount);
+  const hasItems = cartCount() > 0;
 
   return (
     <div className="min-h-screen-d bg-white flex flex-col">
@@ -24,7 +28,12 @@ export function Layout() {
           <Outlet />
         </div>
       </main>
-      <footer className="border-t border-border py-4 px-4 md:px-6 lg:px-8 text-center text-[11px] uppercase tracking-cta text-ink-5">
+      <footer
+        className={
+          'border-t border-border py-4 px-4 md:px-6 lg:px-8 text-center text-[11px] uppercase tracking-cta text-ink-5 ' +
+          (hasItems ? 'pb-28 md:pb-24' : '')
+        }
+      >
         <div>Novo PDV Vivara · Foursys · Clean Arch + TSyringe + Redux + MSAL</div>
         {tenant && (
           <div className="mt-1 text-[10px] text-ink-4">
@@ -33,6 +42,7 @@ export function Layout() {
           </div>
         )}
       </footer>
+      <SalesBagBar />
       <CopilotPanel />
       <Toaster
         position="top-right"

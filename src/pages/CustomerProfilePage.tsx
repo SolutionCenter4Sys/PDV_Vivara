@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { toast } from 'sonner';
 import {
   ArrowLeft,
   MessageCircle,
@@ -16,6 +17,11 @@ import {
   Smartphone,
   Store,
   Package,
+  CreditCard,
+  Trash2,
+  Plus,
+  Minus,
+  ArrowRight,
 } from 'lucide-react';
 import { customers, getCustomerById, getProductById, orders } from '@/data/mocks';
 import { customerInteractions, loyaltyAccounts } from '@/data/extendedMocks';
@@ -53,9 +59,19 @@ export function CustomerProfilePage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const tp = useTenantPath();
-  const { selectCustomer } = usePosStore();
+  const {
+    selectCustomer,
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+    activeCustomer,
+    cart,
+    cartTotal,
+    cartCount,
+  } = usePosStore();
   const customer = getCustomerById(id);
   const [loading, setLoading] = useState(true);
+  const [mergeOpen, setMergeOpen] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -102,12 +118,31 @@ export function CustomerProfilePage() {
     .filter(i => i.customerId === customer.id)
     .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
   const loyalty = loyaltyAccounts[customer.id];
-  const [mergeOpen, setMergeOpen] = useState(false);
+
+  const isThisCustomerActive = activeCustomer?.id === customer.id;
+  const sessionItems = isThisCustomerActive ? cart : [];
+  const sessionCount = isThisCustomerActive ? cartCount() : 0;
+  const sessionTotal = isThisCustomerActive ? cartTotal() : 0;
 
   const handleStartAttendance = () => {
     selectCustomer(customer);
     navigate(tp('/catalogo'));
   };
+
+  const handleAddWishlistItem = (productId: string) => {
+    const product = getProductById(productId);
+    if (!product) return;
+    if (!isThisCustomerActive) {
+      selectCustomer(customer);
+    }
+    addToCart(product);
+    toast.success('Peça adicionada à sacola', {
+      description: `${product.name} vinculada à venda de ${customer.name}.`,
+    });
+  };
+
+  const handleGoToBag = () => navigate(tp('/carrinho'));
+  const handleGoToPayment = () => navigate(tp('/pagamento'));
 
   const tierBadge = clsx(
     'tag',
@@ -198,6 +233,149 @@ export function CustomerProfilePage() {
             </div>
           </div>
         ))}
+      </section>
+
+      {/* Sacola da venda · sessão de atendimento ativa */}
+      <section
+        aria-label="Sacola da venda em andamento"
+        className={clsx(
+          'card p-5 md:p-6 border-2 transition-colors',
+          isThisCustomerActive && sessionCount > 0
+            ? 'bg-coral-50 border-coral-500'
+            : 'bg-ink-1 border-border',
+        )}
+      >
+        <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
+          <div>
+            <div className="text-[10px] uppercase tracking-label font-bold text-coral-500 mb-1 flex items-center gap-2">
+              <ShoppingBag size={12} aria-hidden="true" />
+              Sacola da venda · sessão de atendimento
+            </div>
+            <h2 className="heading-serif text-fluid-h3">
+              {isThisCustomerActive && sessionCount > 0 ? (
+                <>
+                  {sessionCount} {sessionCount === 1 ? 'peça' : 'peças'} ·{' '}
+                  <em className="text-coral-500">{formatBRL(sessionTotal)}</em>
+                </>
+              ) : isThisCustomerActive ? (
+                <>Sessão aberta para <em className="text-coral-500">{customer.name.split(' ')[0]}</em></>
+              ) : (
+                <>Inicie o atendimento para montar a sacola</>
+              )}
+            </h2>
+            <p className="text-[12px] text-ink-5 mt-1">
+              {isThisCustomerActive && sessionCount > 0
+                ? 'Itens da sessão ficam vinculados à NFC-e, fidelidade e CRM do cliente ao confirmar o pagamento.'
+                : isThisCustomerActive
+                  ? 'Adicione peças pelo catálogo, scan, wishlist ou Endless Aisle. Tudo entra automaticamente nesta sacola.'
+                  : 'Clique em "Iniciar atendimento" para vincular o cliente e habilitar a sacola.'}
+            </p>
+          </div>
+          {!isThisCustomerActive && (
+            <button onClick={handleStartAttendance} className="btn-primary">
+              <ShoppingBag size={14} aria-hidden="true" /> Iniciar atendimento
+            </button>
+          )}
+        </div>
+
+        {isThisCustomerActive && sessionItems.length > 0 && (
+          <ul role="list" className="divide-y divide-coral-200/60 mb-4">
+            {sessionItems.map((item) => (
+              <li
+                key={item.product.id}
+                className="py-3 flex items-center gap-3 flex-wrap"
+              >
+                <div className="w-14 h-14 bg-white border border-coral-200 flex-shrink-0 overflow-hidden">
+                  <img
+                    src={item.product.imageUrl}
+                    alt={item.product.imageAlt || item.product.name}
+                    loading="lazy"
+                    className="w-full h-full object-contain p-1"
+                  />
+                </div>
+                <div className="flex-1 min-w-[160px]">
+                  <div className="text-[10px] uppercase tracking-label font-bold text-coral-500">
+                    {item.product.collection || item.product.brand.toUpperCase()}
+                  </div>
+                  <div className="text-sm font-medium text-ink-7 leading-snug">
+                    {item.product.name}
+                  </div>
+                  <div className="text-[11px] text-ink-5 font-mono mt-0.5">
+                    {item.product.sku} · {item.product.metal}
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                    className="w-9 h-9 border border-coral-300 hover:bg-white flex items-center justify-center transition"
+                    aria-label={`Diminuir quantidade de ${item.product.name}`}
+                  >
+                    <Minus size={14} aria-hidden="true" />
+                  </button>
+                  <span
+                    className="w-8 text-center font-bold tabular-nums"
+                    aria-label={`Quantidade ${item.quantity}`}
+                  >
+                    {item.quantity}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                    className="w-9 h-9 border border-coral-300 hover:bg-white flex items-center justify-center transition"
+                    aria-label={`Aumentar quantidade de ${item.product.name}`}
+                  >
+                    <Plus size={14} aria-hidden="true" />
+                  </button>
+                </div>
+                <div className="text-right min-w-[88px]">
+                  <div className="font-bold text-ink-7 tabular-nums">
+                    {formatBRL(item.product.price * item.quantity)}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeFromCart(item.product.id)}
+                    className="mt-0.5 text-[11px] uppercase tracking-cta font-bold text-ink-5 hover:text-danger inline-flex items-center gap-1"
+                    aria-label={`Remover ${item.product.name} da sacola`}
+                  >
+                    <Trash2 size={11} aria-hidden="true" /> Remover
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {isThisCustomerActive && sessionItems.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_auto] gap-3 items-center pt-3 border-t border-coral-200">
+            <div>
+              <div className="text-[10px] uppercase tracking-label font-bold text-ink-5">
+                Total da sacola
+              </div>
+              <div className="font-serif text-2xl md:text-3xl font-semibold text-coral-500 tabular-nums">
+                {formatBRL(sessionTotal)}
+              </div>
+            </div>
+            <button onClick={handleGoToBag} className="btn-secondary btn-lg">
+              <ShoppingBag size={14} aria-hidden="true" /> Ver sacola completa
+            </button>
+            <button onClick={handleGoToPayment} className="btn-primary btn-lg">
+              <CreditCard size={14} aria-hidden="true" /> Ir ao pagamento
+              <ArrowRight size={14} aria-hidden="true" />
+            </button>
+          </div>
+        )}
+
+        {isThisCustomerActive && sessionItems.length === 0 && (
+          <div className="flex flex-wrap gap-2">
+            <button onClick={() => navigate(tp('/catalogo'))} className="btn-primary">
+              Ir ao catálogo
+            </button>
+            <button onClick={() => navigate(tp('/catalogo-estendido'))} className="btn-secondary">
+              <Globe size={14} aria-hidden="true" /> Endless Aisle
+            </button>
+          </div>
+        )}
       </section>
 
       {/* EP-03-F2 · Identidades cross-channel · CTA de mesclagem */}
@@ -315,12 +493,75 @@ export function CustomerProfilePage() {
           </div>
         </div>
         <div className="md:col-span-2">
-          <h2 className="heading-serif text-fluid-h3 mb-3">Wishlist</h2>
+          <div className="flex items-center justify-between gap-3 flex-wrap mb-3">
+            <h2 className="heading-serif text-fluid-h3">Wishlist</h2>
+            {wishlistProducts.length > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (!isThisCustomerActive) selectCustomer(customer);
+                  let added = 0;
+                  wishlistProducts.forEach((p) => {
+                    if (p) {
+                      addToCart(p);
+                      added += 1;
+                    }
+                  });
+                  if (added > 0) {
+                    toast.success(`${added} peças da wishlist na sacola`, {
+                      description: 'Cliente vinculado · revise antes de pagar.',
+                    });
+                  }
+                }}
+                className="btn-tertiary p-0 text-[11px] inline-flex items-center gap-1"
+                aria-label="Adicionar todas as peças da wishlist à sacola"
+              >
+                <ShoppingBag size={12} aria-hidden="true" /> Adicionar todas
+              </button>
+            )}
+          </div>
           {wishlistProducts.length === 0 ? (
             <div className="card p-6 text-center text-ink-5">Sem peças na wishlist.</div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {wishlistProducts.map(p => p && <ProductCard key={p.id} product={p} />)}
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {wishlistProducts.map(p => p && <ProductCard key={p.id} product={p} />)}
+              </div>
+              <ul role="list" className="card divide-y divide-border-light">
+                {wishlistProducts.map((p) =>
+                  p ? (
+                    <li
+                      key={`wlrow-${p.id}`}
+                      className="p-3 flex items-center gap-3 flex-wrap"
+                    >
+                      <div className="w-12 h-12 bg-ink-1 flex-shrink-0 overflow-hidden">
+                        <img
+                          src={p.imageUrl}
+                          alt={p.imageAlt || p.name}
+                          loading="lazy"
+                          className="w-full h-full object-contain p-1"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-[180px]">
+                        <div className="text-sm font-medium text-ink-7 leading-snug truncate">
+                          {p.name}
+                        </div>
+                        <div className="text-[11px] text-ink-5 font-mono">
+                          {p.sku} · {formatBRL(p.price)}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleAddWishlistItem(p.id)}
+                        className="btn-primary btn-sm"
+                        aria-label={`Adicionar ${p.name} à sacola da venda`}
+                      >
+                        <ShoppingBag size={12} aria-hidden="true" /> Sacola
+                      </button>
+                    </li>
+                  ) : null,
+                )}
+              </ul>
             </div>
           )}
         </div>

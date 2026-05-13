@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ChevronRight, Home } from 'lucide-react';
+import { useTenantPath } from '@/presentation/hooks/useTenantPath';
 
 export interface BreadcrumbItem {
   label: string;
@@ -12,8 +13,9 @@ interface Props {
 }
 
 export function Breadcrumb({ items, showHome = true }: Props) {
+  const tp = useTenantPath();
   const trail: BreadcrumbItem[] = showHome
-    ? [{ label: 'Atendimento', to: '/' }, ...items]
+    ? [{ label: 'Atendimento', to: tp('/') }, ...items]
     : items;
 
   return (
