@@ -19,6 +19,7 @@ import {
   CustomerQuickScanDialog,
   type ScanInitialPanel,
 } from '@/components/CustomerQuickScanDialog';
+import { EndAttendanceButton } from '@/components/EndAttendanceButton';
 import { usePosStore } from '@/store/usePosStore';
 import { useTenantPath } from '@/presentation/hooks/useTenantPath';
 import { formatBRL, formatPercent } from '@/utils/format';
@@ -93,16 +94,19 @@ export function HomePage() {
       {/* Atendimento ativo */}
       {activeCustomer && (
         <section className="bg-coral-50 border border-coral-200 p-6 reveal">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
             <div className="text-[11px] uppercase tracking-label text-coral-500 font-bold flex items-center gap-2">
               <Sparkles size={14} /> Atendimento ativo
             </div>
-            <button
-              onClick={() => navigate(tp(`/cliente/${activeCustomer.id}`))}
-              className="text-[11px] uppercase tracking-cta font-bold text-ink-7 hover:text-coral-500"
-            >
-              Ver 360 →
-            </button>
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                onClick={() => navigate(tp(`/cliente/${activeCustomer.id}`))}
+                className="text-[11px] uppercase tracking-cta font-bold text-ink-7 hover:text-coral-500"
+              >
+                Ver 360 →
+              </button>
+              <EndAttendanceButton variant="secondary" />
+            </div>
           </div>
           <CustomerCard customer={activeCustomer} />
         </section>

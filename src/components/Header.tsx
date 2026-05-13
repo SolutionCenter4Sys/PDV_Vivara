@@ -32,6 +32,7 @@ import { ConnectionBadge } from './ConnectionBadge';
 import { CustomerQuickScanDialog } from './CustomerQuickScanDialog';
 import { BrandSwitcher } from './BrandSwitcher';
 import { MposBadge } from './MposBadge';
+import { EndAttendanceButton } from './EndAttendanceButton';
 import { usePosStore } from '@/store/usePosStore';
 import { useTenantPath } from '@/presentation/hooks/useTenantPath';
 
@@ -72,7 +73,7 @@ const ADMIN_ITEMS = [
 ];
 
 export function Header() {
-  const { seller, brand, cartCount, logout, toggleCopilot } = usePosStore();
+  const { seller, brand, cartCount, logout, toggleCopilot, activeCustomer } = usePosStore();
   const location = useLocation();
   const navigate = useNavigate();
   const tp = useTenantPath();
@@ -163,17 +164,42 @@ export function Header() {
           <BrandSwitcher />
           <MposBadge />
           <ConnectionBadge />
-          <button
-            type="button"
-            onClick={() => setScanOpen(true)}
-            className="hidden md:inline-flex items-center gap-1.5 px-2.5 xl:px-3 py-2 min-h-[44px] text-[11px] uppercase tracking-cta font-bold border border-ink-7 text-ink-7 hover:bg-ink-7 hover:text-white transition"
-            title="Identificar cliente · QR / CPF / busca"
-            aria-label="Identificar cliente · scan QR ou busca"
-          >
-            <ScanLine size={14} aria-hidden="true" />
-            <span className="hidden xl:inline">Identificar</span>
-            <span className="xl:hidden">QR</span>
-          </button>
+          {activeCustomer ? (
+            <div
+              className="hidden md:inline-flex items-center gap-1.5 pl-1.5 pr-1 py-1 min-h-[44px] bg-coral-50 border border-coral-200 text-ink-7 transition"
+              title={`Atendendo ${activeCustomer.name} · clique no X para encerrar`}
+              role="status"
+              aria-label={`Atendendo ${activeCustomer.name}`}
+            >
+              <Link
+                to={tp(`/cliente/${activeCustomer.id}`)}
+                className="inline-flex items-center gap-1.5 hover:underline"
+              >
+                <span
+                  className="w-7 h-7 rounded-full bg-coral-500 text-white flex items-center justify-center font-serif text-[12px] font-semibold"
+                  aria-hidden="true"
+                >
+                  {activeCustomer.name.charAt(0)}
+                </span>
+                <span className="hidden xl:inline text-[11px] uppercase tracking-cta font-bold max-w-[110px] truncate">
+                  {activeCustomer.name.split(' ')[0]}
+                </span>
+              </Link>
+              <EndAttendanceButton variant="icon" />
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setScanOpen(true)}
+              className="hidden md:inline-flex items-center gap-1.5 px-2.5 xl:px-3 py-2 min-h-[44px] text-[11px] uppercase tracking-cta font-bold border border-ink-7 text-ink-7 hover:bg-ink-7 hover:text-white transition"
+              title="Identificar cliente · QR / CPF / busca"
+              aria-label="Identificar cliente · scan QR ou busca"
+            >
+              <ScanLine size={14} aria-hidden="true" />
+              <span className="hidden xl:inline">Identificar</span>
+              <span className="xl:hidden">QR</span>
+            </button>
+          )}
           <button
             type="button"
             onClick={toggleCopilot}
@@ -374,6 +400,29 @@ export function Header() {
             </nav>
 
             <div className="p-5 border-t border-border space-y-2">
+              {activeCustomer && (
+                <div className="flex items-center gap-3 px-3 py-2 bg-coral-50 border border-coral-200">
+                  <span
+                    className="w-9 h-9 rounded-full bg-coral-500 text-white flex items-center justify-center font-serif text-sm font-semibold flex-shrink-0"
+                    aria-hidden="true"
+                  >
+                    {activeCustomer.name.charAt(0)}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[10px] uppercase tracking-cta font-bold text-coral-500">
+                      Atendendo
+                    </div>
+                    <div className="text-[12px] font-medium text-ink-7 truncate">
+                      {activeCustomer.name}
+                    </div>
+                  </div>
+                  <EndAttendanceButton
+                    variant="ghost"
+                    label="Encerrar"
+                    onAfterEnd={() => setDrawerOpen(false)}
+                  />
+                </div>
+              )}
               <button
                 type="button"
                 onClick={() => {
@@ -383,7 +432,7 @@ export function Header() {
                 className="w-full inline-flex items-center justify-center gap-2 px-3 py-3 text-[11px] uppercase tracking-cta font-bold border border-ink-7 text-ink-7 hover:bg-ink-7 hover:text-white transition"
               >
                 <ScanLine size={14} aria-hidden="true" />
-                Identificar cliente
+                {activeCustomer ? 'Trocar cliente' : 'Identificar cliente'}
               </button>
               <button
                 type="button"

@@ -39,6 +39,7 @@ import { Breadcrumb } from '@/components/Breadcrumb';
 import { CustomerProfileSkeleton } from '@/components/Skeleton';
 import { EmptyState } from '@/components/EmptyState';
 import { IdentityMergeDialog } from '@/components/IdentityMergeDialog';
+import { EndAttendanceButton } from '@/components/EndAttendanceButton';
 import { usePosStore } from '@/store/usePosStore';
 import { useTenantPath } from '@/presentation/hooks/useTenantPath';
 import { daysUntil, formatBRL, formatRelativeDate, maskCpf, tierLabel } from '@/utils/format';
@@ -200,9 +201,17 @@ export function CustomerProfilePage() {
           </div>
         </div>
         <div className="flex flex-row md:col-span-2 lg:col-span-1 lg:flex-col gap-2 md:flex-wrap">
-          <button onClick={handleStartAttendance} className="btn-primary flex-1 lg:flex-none">
-            <ShoppingBag size={14} aria-hidden="true" /> Iniciar atendimento
-          </button>
+          {isThisCustomerActive ? (
+            <EndAttendanceButton
+              variant="primary"
+              label="Trocar atendimento"
+              className="flex-1 lg:flex-none"
+            />
+          ) : (
+            <button onClick={handleStartAttendance} className="btn-primary flex-1 lg:flex-none">
+              <ShoppingBag size={14} aria-hidden="true" /> Iniciar atendimento
+            </button>
+          )}
           {customer.optInWhatsapp && (
             <button className="btn-secondary btn-sm flex-1 lg:flex-none">
               <MessageCircle size={12} aria-hidden="true" /> WhatsApp

@@ -66,6 +66,12 @@ interface PosShape {
   logout: () => void;
   setConnectivity: (status: ConnectivityStatus) => void;
   selectCustomer: (customer: Customer | null) => void;
+  /**
+   * Encerra a sessao de atendimento ativa: desvincula o cliente,
+   * limpa a sacola e prepara o turno para o proximo cliente.
+   * Equivale a um "trocar atendimento" e tem semantica clara para a UI.
+   */
+  endAttendance: () => void;
   addToCart: (product: Product, quantity?: number) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, qty: number) => void;
@@ -108,6 +114,10 @@ function buildShape(): PosShape {
     },
     selectCustomer: (customer) => {
       store.dispatch(selectCustomerAction(customer));
+    },
+    endAttendance: () => {
+      store.dispatch(clearCartAction());
+      store.dispatch(selectCustomerAction(null));
     },
     addToCart: (product, quantity = 1) => {
       store.dispatch(addToCartAction({ product, quantity }));
