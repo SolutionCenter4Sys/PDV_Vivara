@@ -9,6 +9,7 @@ import type {
   Order,
   ServiceOrder,
   CopilotNudge,
+  CartItem,
 } from '@/types';
 import { productsExtra } from './productsExtra';
 
@@ -1258,6 +1259,7 @@ export const copilotNudges: CopilotNudge[] = [
     body: 'VIP Diamond · aniversário em 12 dias · interesse em pingentes solitário.',
     urgency: 'high',
     margin: 'optimal',
+    agentRole: 'CDP Sentinel',
     createdAt: new Date().toISOString(),
   },
   {
@@ -1269,6 +1271,7 @@ export const copilotNudges: CopilotNudge[] = [
     body: 'Brincos Una complementam o anel Forever que ela possui · margem otimizada · disponível em estoque local.',
     urgency: 'normal',
     margin: 'optimal',
+    agentRole: 'Wishlist Engine',
     createdAt: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
   },
   {
@@ -1278,6 +1281,7 @@ export const copilotNudges: CopilotNudge[] = [
     title: 'Beatriz Lima · aniversário em 2 dias',
     body: 'Cliente Diamond · sugerir presente para esposo · histórico de pérolas.',
     urgency: 'high',
+    agentRole: 'Clienteling Antecipatório',
     createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
   },
   {
@@ -1288,7 +1292,79 @@ export const copilotNudges: CopilotNudge[] = [
     body: 'Cliente está olhando o anel Vivara · brinco Giardino combina · 41 unidades em rede.',
     urgency: 'normal',
     margin: 'good',
+    agentRole: 'Sacola Engine',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+  },
+  // ───────────────────────────── novos papéis (May/26)
+  {
+    id: 'NUDGE-05',
+    type: 'intent-prediction',
+    customerId: 'CL-001',
+    title: 'Intenção: presente de aniversário (87%)',
+    body: 'Visão 360° detectou padrão "autopresente em data-marco" · LSTM treinado em 24m de histórico Vivara. Próxima ação: abrir wishlist e oferecer combinação.',
+    urgency: 'high',
+    margin: 'optimal',
+    agentRole: 'Visão 360°',
+    valueHint: 4200,
+    createdAt: new Date(Date.now() - 1000 * 60 * 2).toISOString(),
+  },
+  {
+    id: 'NUDGE-06',
+    type: 'vitrine-trigger',
+    productSku: 'AN00055910',
+    title: 'Vitrine reagiu · casal jovem 28-35',
+    body: 'Câmera da vitrine reconheceu perfil "casal pré-noivado" parado há 14s · vitrine trocou destaque para Solitário Forever · vendedor pode abordar agora.',
+    urgency: 'high',
+    margin: 'optimal',
+    agentRole: 'Vitrine Vision',
+    valueHint: 6890,
+    createdAt: new Date(Date.now() - 1000 * 60 * 1).toISOString(),
+  },
+  {
+    id: 'NUDGE-07',
+    type: 'bundle-suggestion',
+    customerId: 'CL-001',
+    productSku: 'CO00023616',
+    title: 'Bundle inteligente · margem +18%',
+    body: 'Sacola tem brinco Una · sugerir colar Giardino mesma família + serviço de gravação personalizada. Cross-sell contextual em tempo real.',
+    urgency: 'normal',
+    margin: 'optimal',
+    agentRole: 'Sacola Inteligente',
+    valueHint: 3450,
+    createdAt: new Date(Date.now() - 1000 * 60 * 8).toISOString(),
+  },
+  {
+    id: 'NUDGE-08',
+    type: 'identity-merge',
+    customerId: 'CL-002',
+    title: 'Identidade unificada · cross-channel',
+    body: 'Lead anônima da loja online (carrinho abandonado em 02/05) reconhecida como Carolina Mendes (Gold) ao escanear QR · 3 pontos de contato fundidos em 1.2s.',
+    urgency: 'normal',
+    agentRole: 'Cross-Channel Unifier',
+    valueHint: 2890,
+    createdAt: new Date(Date.now() - 1000 * 60 * 12).toISOString(),
+  },
+  {
+    id: 'NUDGE-09',
+    type: 'combination',
+    customerId: 'CL-011',
+    productSku: 'BE00051920',
+    title: 'Estilo IA · pingente combina com peças que ela já possui',
+    body: 'Beatriz tem 3 colares de pérola · pingente Solitário 0.30ct fecha narrativa de coleção. Recomendação curatorial.',
+    urgency: 'normal',
+    margin: 'good',
+    agentRole: 'Estilo IA',
+    createdAt: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
+  },
+  {
+    id: 'NUDGE-10',
+    type: 'risk',
+    customerId: 'CL-007',
+    title: 'Atenção · cliente em janela de churn',
+    body: 'Sem compras há 9 meses (era trimestral). Sentinela sugere reativação via WhatsApp 1:1 com peça da última visualização.',
+    urgency: 'normal',
+    agentRole: 'Sentinela de Risco',
+    createdAt: new Date(Date.now() - 1000 * 60 * 90).toISOString(),
   },
 ];
 
@@ -1299,3 +1375,290 @@ export const getProductBySku = (sku?: string) =>
   sku ? products.find(p => p.sku === sku) : undefined;
 export const getProductById = (id?: string) =>
   id ? products.find(p => p.id === id) : undefined;
+
+// =====================
+// SACOLA INTELIGENTE · sugestões contextuais em tempo real (Agente IA)
+// =====================
+//
+// Heurísticas determinísticas mock (em produção: Sacola Engine + Pricing IA):
+//   1. companion-piece    → peça complementar da mesma coleção/família
+//   2. margin-bundle      → peça de margem otimizada que combina com o ticket atual
+//   3. gift-add-on        → mini-peça (Life ou kids) p/ presente surpresa
+//   4. service-upsell     → serviço de gravação/banho (não-mock, narrativa)
+//
+// Filtros: nunca sugere algo que JÁ está no carrinho · respeita tier do cliente.
+
+export interface SmartBagSuggestion {
+  id: string;
+  kind: 'companion-piece' | 'margin-bundle' | 'gift-add-on' | 'service-upsell';
+  product?: Product;
+  /** Texto curto exibido como motivo no card. */
+  rationale: string;
+  /** Estimativa de uplift de margem (%). */
+  marginUpliftPct: number;
+  /** Papel do agente IA que detectou esta sugestão. */
+  agentRole: string;
+}
+
+/**
+ * Gera 1-3 sugestões inteligentes para a sacola atual.
+ * Determinístico para que o demo seja reprodutível em apresentações.
+ */
+export function getSmartBagSuggestions(
+  cart: CartItem[],
+  customer?: Customer,
+): SmartBagSuggestion[] {
+  if (cart.length === 0) return [];
+
+  const cartIds = new Set(cart.map((i) => i.product.id));
+  const cartCategories = new Set(cart.map((i) => i.product.category));
+  const cartCollections = new Set(
+    cart.map((i) => i.product.collection).filter(Boolean) as string[],
+  );
+  const cartTotal = cart.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
+  const tierAffinity = customer?.tier ?? 'standard';
+
+  const suggestions: SmartBagSuggestion[] = [];
+
+  // 1. companion-piece · mesma coleção, categoria diferente
+  const companion = products.find(
+    (p) =>
+      !cartIds.has(p.id) &&
+      p.collection &&
+      cartCollections.has(p.collection) &&
+      !cartCategories.has(p.category) &&
+      p.stockNetwork > 0,
+  );
+  if (companion) {
+    const collectionName = companion.collection ?? '';
+    suggestions.push({
+      id: 'SMART-COMPANION',
+      kind: 'companion-piece',
+      product: companion,
+      rationale: `Mesma família ${collectionName} já presente na sacola · 73% das clientes que levam essa coleção fecham com a peça-irmã.`,
+      marginUpliftPct: 14,
+      agentRole: 'Estilo IA',
+    });
+  }
+
+  // 2. margin-bundle · peça com aderência ao ticket médio do tier
+  const minBundlePrice =
+    tierAffinity === 'diamond' ? 1800 : tierAffinity === 'gold' ? 700 : 250;
+  const maxBundlePrice =
+    tierAffinity === 'diamond' ? 8000 : tierAffinity === 'gold' ? 3500 : 1200;
+  const bundle = products.find(
+    (p) =>
+      !cartIds.has(p.id) &&
+      p.price >= minBundlePrice &&
+      p.price <= maxBundlePrice &&
+      p.tag !== 'limitada' &&
+      !cartCategories.has(p.category) &&
+      p.stockNetwork > 5,
+  );
+  if (bundle && bundle.id !== companion?.id) {
+    suggestions.push({
+      id: 'SMART-BUNDLE',
+      kind: 'margin-bundle',
+      product: bundle,
+      rationale: `Bundle de margem otimizada · uplift estimado +18% sem aumentar friction de fechamento (${tierAffinity}).`,
+      marginUpliftPct: 18,
+      agentRole: 'Sacola Engine',
+    });
+  }
+
+  // 3. gift-add-on · só aparece em tickets > R$ 1500 ou cliente diamond/gold
+  if (cartTotal > 1500 || tierAffinity === 'diamond' || tierAffinity === 'gold') {
+    const gift = products.find(
+      (p) =>
+        !cartIds.has(p.id) &&
+        p.price < 800 &&
+        p.brand === 'life' &&
+        p.stockNetwork > 0 &&
+        p.id !== companion?.id &&
+        p.id !== bundle?.id,
+    );
+    if (gift) {
+      suggestions.push({
+        id: 'SMART-GIFT',
+        kind: 'gift-add-on',
+        product: gift,
+        rationale: `Add-on Life · presente surpresa para acompanhante · histórico mostra +21% conversão quando oferecido após item Vivara.`,
+        marginUpliftPct: 9,
+        agentRole: 'Sacola Inteligente',
+      });
+    }
+  }
+
+  // 4. service-upsell · sempre presente quando há ao menos 1 peça > R$ 1000
+  const eligibleForService = cart.some((i) => i.product.price > 1000);
+  if (eligibleForService) {
+    suggestions.push({
+      id: 'SMART-SERVICE',
+      kind: 'service-upsell',
+      rationale: `Serviço de gravação personalizada (3-5 dias úteis) · adiciona +R$ 89 com margem 92% e fideliza pelo simbólico.`,
+      marginUpliftPct: 7,
+      agentRole: 'Estilo IA',
+    });
+  }
+
+  return suggestions.slice(0, 3);
+}
+
+// =====================
+// VISÃO 360° · Briefing pré-atendimento gerado pelo Agente IA
+// =====================
+//
+// Em produção: LSTM treinado sobre 24m de transações Vivara/Life + sinais
+// online (visitas, abandono carrinho, wishlist) + opt-in de canal.
+// Aqui é determinístico para reprodutibilidade do demo.
+
+export type CustomerIntentKind =
+  | 'self-treat'        // autopresente
+  | 'gift-anniversary'  // presente para data
+  | 'gift-spontaneous'  // presente sem data específica
+  | 'wedding-band'      // aliança
+  | 'collection-build'  // completar coleção
+  | 'reactivation';     // reativação após silêncio
+
+export interface CustomerIntentBriefing {
+  kind: CustomerIntentKind;
+  /** Confiança do modelo em % (0-100). */
+  confidence: number;
+  /** Headline pronta para o vendedor ler em 5s. */
+  headline: string;
+  /** Próxima ação sugerida (1 frase). */
+  nextAction: string;
+  /** Peça-âncora sugerida para iniciar conversa (sku se houver). */
+  anchorSku?: string;
+  /** Janelas/datas relevantes (ex: aniversário em 12 dias). */
+  signals: string[];
+  /** Papel do agente IA emissor. */
+  agentRole: string;
+}
+
+export function getCustomerIntentBriefing(
+  customer: Customer,
+): CustomerIntentBriefing {
+  const today = new Date();
+
+  // Dias até próximo aniversário
+  let daysToBday: number | null = null;
+  if (customer.birthday) {
+    const b = new Date(customer.birthday);
+    const next = new Date(today.getFullYear(), b.getMonth(), b.getDate());
+    if (next.getTime() < today.getTime()) {
+      next.setFullYear(today.getFullYear() + 1);
+    }
+    daysToBday = Math.ceil((next.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  }
+
+  const daysSinceLast = Math.ceil(
+    (today.getTime() - new Date(customer.lastPurchaseISO).getTime()) /
+      (1000 * 60 * 60 * 24),
+  );
+
+  // Heurística de classificação
+  if (daysSinceLast > 270) {
+    return {
+      kind: 'reactivation',
+      confidence: 79,
+      headline: `${customer.name.split(' ')[0]} está em janela de reativação (${daysSinceLast} dias sem compra)`,
+      nextAction:
+        'Abrir wishlist · oferecer peça da última visualização com cuidado simbólico (não desconto direto).',
+      signals: [
+        `Última compra há ${daysSinceLast} dias`,
+        `LTV ${formatBRLLite(customer.totalLTV)} · ${customer.totalOrders} pedidos históricos`,
+        customer.optInWhatsapp ? 'Opt-in WhatsApp ativo' : 'Sem opt-in WhatsApp',
+      ],
+      agentRole: 'Sentinela de Risco + CDP',
+    };
+  }
+
+  if (daysToBday !== null && daysToBday <= 21) {
+    const isImminent = daysToBday <= 7;
+    return {
+      kind: 'gift-anniversary',
+      confidence: isImminent ? 92 : 84,
+      headline: `Provável presente de aniversário · ${daysToBday} ${daysToBday === 1 ? 'dia' : 'dias'}`,
+      nextAction:
+        isImminent
+          ? 'Sugerir peça da wishlist com pronta entrega · combinar com card pessoal Vivara.'
+          : 'Apresentar curadoria de presentes alinhada ao perfil + criar lembrete WhatsApp 7 dias antes.',
+      signals: [
+        `Aniversário em ${daysToBday} dias`,
+        ...(customer.preferences.length > 0
+          ? [`Preferências: ${customer.preferences.slice(0, 3).join(', ')}`]
+          : []),
+        `${customer.totalOrders} compras históricas · ticket médio ${
+          customer.totalOrders > 0
+            ? formatBRLLite(Math.round(customer.totalLTV / customer.totalOrders))
+            : '—'
+        }`,
+      ],
+      agentRole: 'Visão 360° + Clienteling Antecipatório',
+    };
+  }
+
+  if (customer.tier === 'diamond' && customer.totalOrders >= 6) {
+    return {
+      kind: 'collection-build',
+      confidence: 76,
+      headline: `Cliente Diamond construindo coleção · padrão de compra recorrente detectado`,
+      nextAction:
+        'Apresentar peça-irmã da última coleção comprada · oferecer experiência (private viewing / sneak peek lançamento).',
+      signals: [
+        `${customer.totalOrders} pedidos · LTV ${formatBRLLite(customer.totalLTV)}`,
+        `Última compra há ${daysSinceLast} dias · cadência saudável`,
+        ...(customer.preferences.length > 0
+          ? [`Coleções favoritas: ${customer.preferences.slice(0, 2).join(', ')}`]
+          : []),
+      ],
+      agentRole: 'Estilo IA + Wishlist Engine',
+    };
+  }
+
+  if (customer.totalOrders === 0) {
+    return {
+      kind: 'gift-spontaneous',
+      confidence: 62,
+      headline: `Primeira visita · sem histórico transacional · perfil ${customer.tier}`,
+      nextAction:
+        'Conversa de descoberta · apurar ocasião (presente vs autopresente) + capturar opt-in de wishlist.',
+      signals: [
+        'Sem compras anteriores',
+        customer.optInWhatsapp ? 'Opt-in WhatsApp ativo' : 'Sem canal direto',
+        `Cidade: ${customer.city}`,
+      ],
+      agentRole: 'Visão 360° (cold start)',
+    };
+  }
+
+  // Fallback · autopresente / cross-sell
+  return {
+    kind: 'self-treat',
+    confidence: 71,
+    headline: `${customer.name.split(' ')[0]} costuma se autopresentear nesta janela do mês`,
+    nextAction:
+      'Mostrar lançamentos da semana e peças complementares ao histórico recente.',
+    signals: [
+      `${customer.totalOrders} pedidos · cadência ~${Math.max(
+        1,
+        Math.round(daysSinceLast / Math.max(1, customer.totalOrders)),
+      )} dias`,
+      `Tier ${customer.tier.toUpperCase()} · LTV ${formatBRLLite(customer.totalLTV)}`,
+      ...(customer.preferences.length > 0
+        ? [`Preferências: ${customer.preferences.slice(0, 3).join(', ')}`]
+        : []),
+    ],
+    agentRole: 'Visão 360°',
+  };
+}
+
+// Util local · evita import circular com utils/format ao gerar briefing
+function formatBRLLite(value: number): string {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+    maximumFractionDigits: 0,
+  }).format(value);
+}

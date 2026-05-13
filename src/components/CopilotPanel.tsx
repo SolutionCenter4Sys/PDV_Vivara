@@ -6,7 +6,11 @@ import { toggleCopilot } from '@app/store/slices/copilotSlice';
 import { NudgeCard } from './copilot/NudgeCard';
 
 /**
- * EP-05-F1 · LI-01 Copilot Multi-Agente · refatorado em party mode (Bella + Eliza + Ju).
+ * EP-05-F1 · LI-01 Agente IA Multi-Agente · refatorado em party mode (Bella + Eliza + Ju).
+ *
+ * Posicionamento (May/26):
+ *   "Agente IA" é o nome de produto exposto ao vendedor. Internamente o slice
+ *   continua chamado `copilot` por compat (sem refactor de tokens DI).
  *
  * Tese de design (Ju):
  *   "Vendemos decisão, não letrinhas."
@@ -69,7 +73,7 @@ export function CopilotPanel() {
       <button
         type="button"
         onClick={() => setExpanded(false)}
-        aria-label="Fechar painel Copilot"
+        aria-label="Fechar painel Agente IA"
         className={clsx(
           'fixed inset-0 z-30 bg-ink-7/30 backdrop-blur-sm md:hidden transition-opacity motion-reduce:transition-none',
           expanded ? 'opacity-100' : 'opacity-0 pointer-events-none',
@@ -97,7 +101,7 @@ export function CopilotPanel() {
           'transition-transform duration-300 ease-out motion-reduce:transition-none',
         )}
         role="complementary"
-        aria-label="Painel Copilot Living Intelligence"
+        aria-label="Painel Agente IA Living Intelligence"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         {/* ─────────── HEADER ─────────── */}
@@ -126,10 +130,10 @@ export function CopilotPanel() {
               </span>
               <div className="min-w-0">
                 <div className="font-serif font-semibold text-[15px] text-ink-7 leading-tight truncate">
-                  Copilot
+                  Agente IA
                 </div>
                 <div className="text-[10px] uppercase tracking-cta font-bold text-coral-500 truncate">
-                  Living Intelligence
+                  Multi-agente · Living Intelligence
                 </div>
               </div>
             </div>
@@ -147,7 +151,7 @@ export function CopilotPanel() {
               <button
                 type="button"
                 onClick={() => dispatch(toggleCopilot())}
-                aria-label="Fechar painel Copilot"
+                aria-label="Fechar painel Agente IA"
                 className="w-9 h-9 inline-flex items-center justify-center rounded-full text-ink-5 hover:text-ink-7 hover:bg-white/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-coral-300 transition-colors"
               >
                 <X size={16} aria-hidden="true" />
@@ -231,7 +235,7 @@ export function CopilotPanel() {
                 </div>
                 <div className="font-serif text-[16px] text-ink-7 mb-1">Ambiente sereno</div>
                 <p className="text-[12px] text-ink-5 leading-relaxed max-w-[28ch] mx-auto">
-                  Copilot está observando · novos nudges aparecem aqui em segundos quando uma
+                  Agente IA está observando · novos nudges aparecem aqui em segundos quando uma
                   oportunidade for detectada.
                 </p>
               </div>

@@ -156,7 +156,7 @@ export function LoginPage() {
               Living Intelligence ativa neste PDV
             </div>
             <p className="text-[11px] text-ink-5 leading-relaxed">
-              LI-01 Copilot · LI-03 Inventário Vivo · LI-10 Self-Healing · LGPD-by-design
+              LI-01 Agente IA · LI-03 Inventário Vivo · LI-10 Self-Healing · LGPD-by-design
             </p>
           </div>
         </form>

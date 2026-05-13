@@ -126,16 +126,45 @@ export interface Seller {
 
 export type ConnectivityStatus = 'online' | 'offline' | 'fault';
 
-// Living Intelligence
+// Living Intelligence · Agente IA multi-agente
+//
+// Cada `type` mapeia para um papel distinto do Agente IA exposto ao vendedor.
+// Mapeamento (ver pitch executivo May/26):
+//   vip-arrived       → CDP Sentinel · cliente Diamond entrou no salão
+//   wishlist-match    → Wishlist Engine · peça da wishlist liberada / em estoque local
+//   birthday          → Clienteling Antecipatório · janela de aniversário/marco
+//   combination       → Estilo IA · combinação curatorial de mesma família
+//   cross-sell        → Sacola Inteligente · cross-sell contextual em tempo real
+//   risk              → Sentinela de Risco · churn / antifraude / no-show
+//   intent-prediction → Visão 360° · agente sussurra a próxima ação certa
+//   vitrine-trigger   → Vitrine Inteligente Adaptativa · perfil reconhecido na vitrine
+//   bundle-suggestion → Sacola Inteligente · bundle de margem otimizada (peça + serviço)
+//   identity-merge    → Cross-Channel Unifier · identidade unificada em segundos
+export type CopilotNudgeType =
+  | 'vip-arrived'
+  | 'wishlist-match'
+  | 'birthday'
+  | 'combination'
+  | 'cross-sell'
+  | 'risk'
+  | 'intent-prediction'
+  | 'vitrine-trigger'
+  | 'bundle-suggestion'
+  | 'identity-merge';
+
 export interface CopilotNudge {
   id: string;
-  type: 'vip-arrived' | 'wishlist-match' | 'birthday' | 'combination' | 'cross-sell' | 'risk';
+  type: CopilotNudgeType;
   customerId?: string;
   productSku?: string;
   title: string;
   body: string;
   urgency: 'normal' | 'high';
   margin?: 'optimal' | 'good' | 'attention';
+  /** Nome do papel/agente detector exibido no card (ex. "Vitrine Vision", "Sacola Engine"). */
+  agentRole?: string;
+  /** Oportunidade financeira (R$) explícita; quando ausente é inferida via estimateOpportunity. */
+  valueHint?: number;
   createdAt: string;
 }
 

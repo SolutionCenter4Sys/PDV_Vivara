@@ -253,7 +253,7 @@ export function PaymentPage() {
 
         {activeCustomer?.optInWhatsapp && (
           <div className="bg-coral-50 border border-coral-200 p-5 mb-6 text-left text-sm">
-            <strong>WhatsApp 1:1 enviado</strong> para {activeCustomer.name} com a NFC-e e cuidados da peça. Próxima ação Copilot:
+            <strong>WhatsApp 1:1 enviado</strong> para {activeCustomer.name} com a NFC-e e cuidados da peça. Próxima ação do Agente IA:
             sugestão de combinação com brincos pendentes em 7 dias (LI-05 Antecipatório).
           </div>
         )}

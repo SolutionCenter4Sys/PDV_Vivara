@@ -41,3 +41,7 @@ Thumbs.db
 
 # Artefatos temporários · scripts auxiliares para gerar mocks (JSONs grandes do VTEX)
 .tmp_vtex/
+
+# Saída do tsc para o vite.config (efeito colateral de `tsc -b` durante o build)
+vite.config.js
+vite.config.d.ts

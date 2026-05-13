@@ -31,6 +31,7 @@ import clsx from 'clsx';
 import { ConnectionBadge } from './ConnectionBadge';
 import { CustomerQuickScanDialog } from './CustomerQuickScanDialog';
 import { BrandSwitcher } from './BrandSwitcher';
+import { MposBadge } from './MposBadge';
 import { usePosStore } from '@/store/usePosStore';
 import { useTenantPath } from '@/presentation/hooks/useTenantPath';
 
@@ -67,6 +68,7 @@ const ADMIN_ITEMS = [
   { to: '/rfid', label: 'Inventário RFID', icon: ScanLine },
   { to: '/inventario-vivo', label: 'Inventário Vivo (LI-03)', icon: Eye },
   { to: '/noc', label: 'NOC · 11 lojas', icon: Activity },
+  { to: '/vitrine', label: 'Vitrine Adaptativa (LI-12)', icon: Sparkles },
 ];
 
 export function Header() {
@@ -156,6 +158,7 @@ export function Header() {
 
         <div className="flex items-center gap-2 md:gap-3">
           <BrandSwitcher />
+          <MposBadge />
           <ConnectionBadge />
           <button
             type="button"
@@ -172,12 +175,12 @@ export function Header() {
             type="button"
             onClick={toggleCopilot}
             className="hidden md:inline-flex items-center gap-2 px-3 py-2 min-h-[44px] text-[11px] uppercase tracking-cta font-bold bg-coral-50 text-coral-500 hover:bg-coral-100 transition"
-            title="Copilot Living Intelligence"
-            aria-label="Abrir Copilot Living Intelligence"
+            title="Agente IA · Living Intelligence"
+            aria-label="Abrir painel do Agente IA"
           >
             <Sparkles size={14} aria-hidden="true" />
-            <span className="hidden xl:inline">Copilot LI</span>
-            <span className="xl:hidden">LI</span>
+            <span className="hidden xl:inline">Agente IA</span>
+            <span className="xl:hidden">IA</span>
           </button>
           <Link
             to={tp('/carrinho')}
@@ -388,7 +391,7 @@ export function Header() {
                 className="w-full inline-flex items-center justify-center gap-2 px-3 py-3 text-[11px] uppercase tracking-cta font-bold bg-coral-50 text-coral-500 hover:bg-coral-100 transition"
               >
                 <Sparkles size={14} aria-hidden="true" />
-                Copilot Living Intelligence
+                Agente IA · Living Intelligence
               </button>
               <button
                 type="button"

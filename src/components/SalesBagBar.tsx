@@ -1,9 +1,20 @@
+import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ShoppingBag, ArrowRight, CreditCard, User } from 'lucide-react';
+import {
+  ShoppingBag,
+  ArrowRight,
+  CreditCard,
+  User,
+  Sparkles,
+  ChevronUp,
+  ChevronDown,
+} from 'lucide-react';
 import clsx from 'clsx';
 import { usePosStore } from '@/store/usePosStore';
 import { useTenantPath } from '@/presentation/hooks/useTenantPath';
 import { formatBRL } from '@/utils/format';
+import { getSmartBagSuggestions } from '@/data/mocks';
+import { SmartBagSuggestions } from './SmartBagSuggestions';
 
 /**
  * SalesBagBar · barra de "Sacola da venda" persistente.
@@ -12,6 +23,10 @@ import { formatBRL } from '@/utils/format';
  * atendimento, deixando visível o caminho `Sacola → Pagamento`. Some quando
  * o vendedor já está dentro do fluxo de checkout (carrinho/pagamento) para
  * não duplicar CTAs.
+ *
+ * Inclui um drop-up de "Sacola Inteligente · Agente IA" que mostra cross-sell
+ * contextual em tempo real assim que há sugestões disponíveis para o estado
+ * atual do carrinho.
  */
 export function SalesBagBar() {
   const navigate = useNavigate();
@@ -21,6 +36,7 @@ export function SalesBagBar() {
   const cartCount = usePosStore((s) => s.cartCount);
   const cartTotal = usePosStore((s) => s.cartTotal);
   const activeCustomer = usePosStore((s) => s.activeCustomer);
+  const [smartOpen, setSmartOpen] = useState(false);
 
   const items = cartCount();
   const total = cartTotal();
@@ -29,6 +45,8 @@ export function SalesBagBar() {
   const paymentPath = tp('/pagamento');
   const isOnCart = location.pathname === cartPath;
   const isOnPayment = location.pathname === paymentPath;
+
+  const smartCount = getSmartBagSuggestions(cart, activeCustomer ?? undefined).length;
 
   if (cart.length === 0 || isOnCart || isOnPayment) {
     return null;
@@ -46,6 +64,12 @@ export function SalesBagBar() {
         'border-t-4 border-coral-500 print:hidden',
       )}
     >
+      {/* Drop-up · Sacola Inteligente (Agente IA) */}
+      {smartCount > 0 && smartOpen && (
+        <div className="bg-white text-ink-7 max-w-grid-wide mx-auto px-4 md:px-6 lg:px-8 pt-3 pb-3 border-b border-ink-2">
+          <SmartBagSuggestions variant="compact" />
+        </div>
+      )}
       <div className="max-w-grid-wide mx-auto px-4 md:px-6 lg:px-8 py-3 md:py-4 flex items-center gap-3 md:gap-5 flex-wrap">
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <div
@@ -82,6 +106,28 @@ export function SalesBagBar() {
         </div>
 
         <div className="flex items-center gap-2 md:gap-3 w-full sm:w-auto">
+          {smartCount > 0 && (
+            <button
+              type="button"
+              onClick={() => setSmartOpen((v) => !v)}
+              aria-expanded={smartOpen}
+              aria-controls="smart-bag-dropup"
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 min-h-[44px] text-[11px] uppercase tracking-cta font-bold bg-coral-500/20 text-coral-200 hover:bg-coral-500/30 transition flex-shrink-0"
+              aria-label={`${smartCount} sugest${smartCount === 1 ? 'ão' : 'ões'} do Agente IA${smartOpen ? ' · recolher' : ' · expandir'}`}
+              title="Sacola Inteligente · cross-sell em tempo real"
+            >
+              <Sparkles size={13} aria-hidden="true" />
+              <span className="hidden md:inline">IA</span>
+              <span className="bg-coral-500 text-white rounded-full w-4 h-4 inline-flex items-center justify-center text-[9px]">
+                {smartCount}
+              </span>
+              {smartOpen ? (
+                <ChevronDown size={12} aria-hidden="true" />
+              ) : (
+                <ChevronUp size={12} aria-hidden="true" />
+              )}
+            </button>
+          )}
           <button
             type="button"
             onClick={goToCart}

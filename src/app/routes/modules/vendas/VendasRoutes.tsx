@@ -78,6 +78,9 @@ const InventoryTwinPage = lazy(() =>
 const NocOpsPage = lazy(() =>
   import('@/pages/NocOpsPage').then((m) => ({ default: m.NocOpsPage })),
 );
+const VitrineAdaptativaPage = lazy(() =>
+  import('@/pages/VitrineAdaptativaPage').then((m) => ({ default: m.VitrineAdaptativaPage })),
+);
 
 // Fase 2 · Crediário
 const CrediarioPage = lazy(() =>
@@ -117,6 +120,7 @@ export const VendasRoutes = (
     {/* Fase 2 · Living Intelligence */}
     <Route path="inventario-vivo" element={<InventoryTwinPage />} />
     <Route path="noc" element={<NocOpsPage />} />
+    <Route path="vitrine" element={<VitrineAdaptativaPage />} />
 
     {/* Fase 2 · Crediário */}
     <Route path="crediario" element={<CrediarioPage />} />

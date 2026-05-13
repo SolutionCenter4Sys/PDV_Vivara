@@ -10,6 +10,10 @@ import {
   Check,
   X,
   Watch,
+  Brain,
+  Eye,
+  ShoppingBag,
+  Users,
 } from 'lucide-react';
 import clsx from 'clsx';
 import { useNavigate } from 'react-router-dom';
@@ -39,14 +43,24 @@ interface Props {
 
 const TYPE_META: Record<
   NudgeKind,
-  { label: string; icon: typeof Sparkles; tone: 'coral' | 'gold' | 'rose' | 'amber' | 'plum' | 'slate' }
+  {
+    label: string;
+    icon: typeof Sparkles;
+    tone: 'coral' | 'gold' | 'rose' | 'amber' | 'plum' | 'slate' | 'sky' | 'teal';
+    /** Papel default do Agente IA (sobrescrito por nudge.agentRole se vier do mock). */
+    defaultRole: string;
+  }
 > = {
-  'vip-arrived': { label: 'VIP no salão', icon: Sparkles, tone: 'gold' },
-  'wishlist-match': { label: 'Wishlist match', icon: Heart, tone: 'rose' },
-  birthday: { label: 'Aniversário', icon: Cake, tone: 'plum' },
-  combination: { label: 'Combinação', icon: Layers, tone: 'coral' },
-  'cross-sell': { label: 'Cross-sell', icon: Package, tone: 'amber' },
-  risk: { label: 'Risco', icon: AlertTriangle, tone: 'slate' },
+  'vip-arrived': { label: 'VIP no salão', icon: Sparkles, tone: 'gold', defaultRole: 'CDP Sentinel' },
+  'wishlist-match': { label: 'Wishlist match', icon: Heart, tone: 'rose', defaultRole: 'Wishlist Engine' },
+  birthday: { label: 'Aniversário', icon: Cake, tone: 'plum', defaultRole: 'Clienteling Antecipatório' },
+  combination: { label: 'Combinação', icon: Layers, tone: 'coral', defaultRole: 'Estilo IA' },
+  'cross-sell': { label: 'Cross-sell', icon: Package, tone: 'amber', defaultRole: 'Sacola Engine' },
+  risk: { label: 'Risco', icon: AlertTriangle, tone: 'slate', defaultRole: 'Sentinela de Risco' },
+  'intent-prediction': { label: 'Intenção prevista', icon: Brain, tone: 'coral', defaultRole: 'Visão 360°' },
+  'vitrine-trigger': { label: 'Vitrine reagiu', icon: Eye, tone: 'sky', defaultRole: 'Vitrine Vision' },
+  'bundle-suggestion': { label: 'Bundle sugerido', icon: ShoppingBag, tone: 'teal', defaultRole: 'Sacola Inteligente' },
+  'identity-merge': { label: 'Identidade unificada', icon: Users, tone: 'plum', defaultRole: 'Cross-Channel Unifier' },
 };
 
 const TONE_BG: Record<string, string> = {
@@ -56,6 +70,8 @@ const TONE_BG: Record<string, string> = {
   amber: 'bg-amber-50 text-amber-700',
   plum: 'bg-purple-50 text-purple-700',
   slate: 'bg-ink-1 text-ink-6',
+  sky: 'bg-sky-50 text-sky-700',
+  teal: 'bg-teal-50 text-teal-700',
 };
 
 const MARGIN_LABEL = {
@@ -75,6 +91,8 @@ const MARGIN_LABEL = {
  *   risk                       → 0 (alerta não é venda)
  */
 function estimateOpportunity(nudge: CopilotNudge): number | null {
+  if (nudge.valueHint) return nudge.valueHint;
+
   const product = getProductBySku(nudge.productSku);
   const customer = getCustomerById(nudge.customerId);
   const avgTicket =
@@ -87,11 +105,16 @@ function estimateOpportunity(nudge: CopilotNudge): number | null {
     case 'cross-sell':
       return product?.price ?? avgTicket;
     case 'vip-arrived':
+    case 'intent-prediction':
+    case 'identity-merge':
       return avgTicket;
     case 'birthday':
       return avgTicket ? Math.round(avgTicket * 1.4) : null;
     case 'combination':
+    case 'bundle-suggestion':
       return product ? Math.round(product.price * 1.6) : avgTicket;
+    case 'vitrine-trigger':
+      return product?.price ?? (avgTicket ? Math.round(avgTicket * 0.8) : null);
     case 'risk':
     default:
       return null;
@@ -277,17 +300,25 @@ export function NudgeCard({ nudge, enableSwipe = false, variant = 'standard' }: 
       )}
 
       <div className="p-4 space-y-3">
-        {/* Linha 1 · tipo do nudge + dismiss */}
+        {/* Linha 1 · tipo do nudge + papel do Agente IA + dismiss */}
         <div className="flex items-center justify-between gap-2">
-          <span
-            className={clsx(
-              'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] uppercase tracking-cta font-bold',
-              TONE_BG[meta.tone],
-            )}
-          >
-            <Icon className="w-3 h-3" aria-hidden="true" />
-            {meta.label}
-          </span>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span
+              className={clsx(
+                'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] uppercase tracking-cta font-bold flex-shrink-0',
+                TONE_BG[meta.tone],
+              )}
+            >
+              <Icon className="w-3 h-3" aria-hidden="true" />
+              {meta.label}
+            </span>
+            <span
+              className="text-[9px] uppercase tracking-cta text-ink-4 truncate"
+              title={`Agente IA · ${nudge.agentRole ?? meta.defaultRole}`}
+            >
+              · {nudge.agentRole ?? meta.defaultRole}
+            </span>
+          </div>
           <button
             onClick={handleDismiss}
             className="w-7 h-7 inline-flex items-center justify-center rounded-full text-ink-4 hover:bg-ink-1 hover:text-ink-7 focus:outline-none focus-visible:ring-2 focus-visible:ring-coral-300 transition-colors"

@@ -19,7 +19,10 @@ import type { Product } from '@/types';
  *  - itens da wishlist (boost se categoria coincide)
  *  - margem da peça
  *
- * Em produção · Salesforce Einstein + custom MMM Vivara.
+ * Em produção · Agente IA Vivara (motor preditivo proprietário) com fallback
+ * para Salesforce Einstein quando há janela suficiente para fine-tuning.
+ *
+ * UI exposta: "Agente IA · Preditivo" (rebrand de Maio/26).
  */
 
 interface Reco {
@@ -99,9 +102,9 @@ export function RecommendationsCard({ variant = 'full', className }: Props) {
             className="text-[11px] uppercase tracking-cta font-bold text-coral-500 inline-flex items-center gap-1"
           >
             <Sparkles size={12} aria-hidden="true" />
-            IA · Top 3
+            Agente IA · Top 3
           </h3>
-          <span className="text-[9px] uppercase tracking-cta text-ink-4">Einstein</span>
+          <span className="text-[9px] uppercase tracking-cta text-ink-4">Preditivo</span>
         </header>
         <ul className="space-y-1.5" role="list">
           {recos.map((r, idx) => (
@@ -133,7 +136,7 @@ export function RecommendationsCard({ variant = 'full', className }: Props) {
           className="font-serif text-xl font-semibold inline-flex items-center gap-2"
         >
           <Sparkles size={18} aria-hidden="true" className="text-coral-500" />
-          Recomendações IA · Top 3
+          Agente IA · Recomendações Top 3
         </h2>
         <span className="text-[10px] uppercase tracking-cta text-ink-4 font-bold inline-flex items-center gap-1">
           <TrendingUp size={11} aria-hidden="true" />

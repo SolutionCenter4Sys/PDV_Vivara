@@ -358,7 +358,7 @@ export function ProductPage() {
           {/* LI cross-sell · EP-05-F1 */}
           <section className="mt-8 bg-coral-50 border border-coral-200 p-5">
             <div className="text-[10px] uppercase tracking-label font-bold text-coral-500 mb-2 flex items-center gap-2">
-              <Sparkles size={12} /> Sugestão Copilot · LI-01
+              <Sparkles size={12} /> Sugestão Agente IA · LI-01
             </div>
             <h3 className="font-serif text-xl font-semibold text-ink-7 mb-2">
               Cliente costuma combinar com:

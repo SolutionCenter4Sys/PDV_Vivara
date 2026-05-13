@@ -336,3 +336,173 @@ export const loyaltyAccounts: Record<string, LoyaltyAccount> = {
 
 /** Conversão pontos → R$ (mock · 1 ponto = R$ 0,02) */
 export const POINT_TO_BRL = 0.02;
+
+// =====================
+// VITRINE INTELIGENTE ADAPTATIVA · Agente IA (Vitrine Vision)
+// =====================
+//
+// Em produção: câmera 4K + modelo de visão computacional rodando edge
+// (Jetson Orin) que classifica perfil sociodemográfico (idade, gênero,
+// composição de grupo, dwell-time) sem armazenar imagem nem PII.
+// LGPD-by-design: somente embeddings agregados saem do device.
+//
+// O modelo dispara uma TROCA da peça em destaque na vitrine digital quando
+// a confiança ultrapassa 0.65 e a peça candidata tem probabilidade superior
+// de captura para aquele perfil (Look-alike model treinado em conversão histórica).
+
+export interface VitrineProfile {
+  id: string;
+  /** Faixa etária estimada. */
+  ageRange: '18-24' | '25-34' | '35-44' | '45-54' | '55+';
+  /** Composição do grupo detectado. */
+  groupKind: 'solo-feminino' | 'solo-masculino' | 'casal-jovem' | 'casal-maduro' | 'familia' | 'amigas';
+  /** Confiança do classificador (0-1). */
+  confidence: number;
+}
+
+export interface VitrineEvent {
+  id: string;
+  ts: string; // ISO
+  /** Tempo de permanência detectado em segundos antes da troca. */
+  dwellSec: number;
+  profile: VitrineProfile;
+  /** SKU exibido ANTES da adaptação. */
+  fromSku: string;
+  /** SKU em destaque APÓS adaptação. */
+  toSku: string;
+  /** Motivo curto que aparece no log. */
+  rationale: string;
+  /** True se levou a entrada na loja em até 60s (proxy de captura). */
+  capturedEntry: boolean;
+  /** True se levou a venda na sessão (latência <30min). */
+  capturedSale: boolean;
+}
+
+export interface VitrineKpis {
+  /** Captura média semanal · % de pessoas que entram após dwell em vitrine adaptativa. */
+  captureRateWeekly: number;
+  /** Mesma métrica em vitrines ESTÁTICAS (controle). */
+  captureRateBaseline: number;
+  /** Eventos / hora · ritmo de adaptação. */
+  adaptationsPerHour: number;
+  /** Tempo médio de troca de destaque (ms). */
+  swapLatencyMs: number;
+  /** % de eventos que terminam em venda na mesma sessão. */
+  sessionConversion: number;
+  /** Confiança média do classificador. */
+  modelConfidence: number;
+}
+
+/**
+ * KPIs semanais agregados da vitrine adaptativa (mock realista, alinhado
+ * ao posicionamento do pitch: +% de taxa de captura).
+ */
+export const vitrineKpis: VitrineKpis = {
+  captureRateWeekly: 0.184,        // 18,4%
+  captureRateBaseline: 0.094,      // 9,4% controle
+  adaptationsPerHour: 47,
+  swapLatencyMs: 280,
+  sessionConversion: 0.276,        // 27,6%
+  modelConfidence: 0.81,
+};
+
+/**
+ * Stream de eventos recentes da vitrine (últimos minutos).
+ * Cada evento referencia SKUs reais do catálogo para gerar imagem viva.
+ */
+export const vitrineEvents: VitrineEvent[] = [
+  {
+    id: 'VTR-001',
+    ts: new Date(Date.now() - 1000 * 60 * 1).toISOString(),
+    dwellSec: 14,
+    profile: { id: 'P1', ageRange: '25-34', groupKind: 'casal-jovem', confidence: 0.87 },
+    fromSku: 'BR00081234',
+    toSku: 'AN00055910',
+    rationale: 'Casal pré-noivado · troca para Solitário Forever · histórico mostra +34% captura.',
+    capturedEntry: true,
+    capturedSale: false,
+  },
+  {
+    id: 'VTR-002',
+    ts: new Date(Date.now() - 1000 * 60 * 4).toISOString(),
+    dwellSec: 9,
+    profile: { id: 'P2', ageRange: '35-44', groupKind: 'amigas', confidence: 0.72 },
+    fromSku: 'AN00055910',
+    toSku: 'BR00081567',
+    rationale: 'Grupo de amigas · destaque para brincos statement (impulso entre pares).',
+    capturedEntry: true,
+    capturedSale: true,
+  },
+  {
+    id: 'VTR-003',
+    ts: new Date(Date.now() - 1000 * 60 * 8).toISOString(),
+    dwellSec: 22,
+    profile: { id: 'P3', ageRange: '45-54', groupKind: 'casal-maduro', confidence: 0.91 },
+    fromSku: 'BR00081567',
+    toSku: 'CO00023616',
+    rationale: 'Casal maduro · troca para colar Orbis Pérolas (dwell longo · alto engajamento).',
+    capturedEntry: false,
+    capturedSale: false,
+  },
+  {
+    id: 'VTR-004',
+    ts: new Date(Date.now() - 1000 * 60 * 11).toISOString(),
+    dwellSec: 6,
+    profile: { id: 'P4', ageRange: '18-24', groupKind: 'solo-feminino', confidence: 0.68 },
+    fromSku: 'CO00023616',
+    toSku: 'BR00081234',
+    rationale: 'Cliente jovem solo · troca para entrada de coleção · ticket compatível.',
+    capturedEntry: true,
+    capturedSale: false,
+  },
+  {
+    id: 'VTR-005',
+    ts: new Date(Date.now() - 1000 * 60 * 16).toISOString(),
+    dwellSec: 18,
+    profile: { id: 'P5', ageRange: '25-34', groupKind: 'familia', confidence: 0.79 },
+    fromSku: 'BR00081234',
+    toSku: 'BE00051920',
+    rationale: 'Família com criança detectada · destaque para Pingente Menino (linha Mama).',
+    capturedEntry: true,
+    capturedSale: true,
+  },
+  {
+    id: 'VTR-006',
+    ts: new Date(Date.now() - 1000 * 60 * 22).toISOString(),
+    dwellSec: 11,
+    profile: { id: 'P6', ageRange: '35-44', groupKind: 'solo-feminino', confidence: 0.83 },
+    fromSku: 'BE00051920',
+    toSku: 'AN00055910',
+    rationale: 'Cliente solo · perfil "autopresente" alto · destaque coleção Happy.',
+    capturedEntry: true,
+    capturedSale: false,
+  },
+  {
+    id: 'VTR-007',
+    ts: new Date(Date.now() - 1000 * 60 * 28).toISOString(),
+    dwellSec: 8,
+    profile: { id: 'P7', ageRange: '55+', groupKind: 'casal-maduro', confidence: 0.86 },
+    fromSku: 'AN00055910',
+    toSku: 'CO00023616',
+    rationale: 'Faixa 55+ · destaque para alta joalheria com pérolas (LTV histórico maior).',
+    capturedEntry: false,
+    capturedSale: false,
+  },
+];
+
+/**
+ * Top 5 perfis sociodemográficos detectados nas últimas 24h
+ * (input para report executivo do gerente).
+ */
+export const vitrineTopProfiles: Array<{
+  groupKind: VitrineProfile['groupKind'];
+  ageRange: VitrineProfile['ageRange'];
+  count: number;
+  conversionRate: number;
+}> = [
+  { groupKind: 'solo-feminino', ageRange: '25-34', count: 312, conversionRate: 0.31 },
+  { groupKind: 'casal-jovem', ageRange: '25-34', count: 187, conversionRate: 0.42 },
+  { groupKind: 'amigas', ageRange: '18-24', count: 156, conversionRate: 0.18 },
+  { groupKind: 'casal-maduro', ageRange: '45-54', count: 124, conversionRate: 0.36 },
+  { groupKind: 'familia', ageRange: '35-44', count: 98, conversionRate: 0.27 },
+];

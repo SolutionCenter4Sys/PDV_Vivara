@@ -36,7 +36,7 @@ export function HomePage() {
         </h1>
         <p className="text-ink-5 text-lg max-w-2xl">
           Hoje você está atendendo na <strong className="text-ink-7">{seller?.brand === 'vivara' ? 'Vivara' : 'Life'}</strong>.
-          Os 3 nudges do Copilot estão ativos no painel à direita.
+          O Agente IA está observando e já tem nudges ativos no painel à direita.
         </p>
       </section>
 

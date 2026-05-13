@@ -22,9 +22,9 @@ import { formatBRL, formatRelativeDate } from '@/utils/format';
 /**
  * EP-05-F4 · LI-05 Clienteling Antecipatório.
  *
- * Inbox proativo: Salesforce Einstein + Vivara CDP geram leads
- * "ready-to-buy" para o vendedor. Cada card sugere ação 1:1 personalizada
- * via WhatsApp Business.
+ * Inbox proativo: Agente IA Vivara (com fallback Einstein) cruza CDP +
+ * histórico cross-channel + sinais de loja para gerar leads "ready-to-buy"
+ * para o vendedor. Cada card sugere ação 1:1 personalizada via WhatsApp.
  */
 
 type LeadKind = 'birthday' | 'wishlist_drop' | 'tier_promote' | 'recurring' | 'reactivation';
@@ -143,7 +143,7 @@ export function ClientelingInboxPage() {
           </p>
           <h1 className="heading-serif text-fluid-h1">Inbox proativo</h1>
           <p className="text-ink-5 mt-1 text-[14px]">
-            Einstein + Vivara CDP · {leads.length} oportunidades personalizadas para você atender hoje.
+            Agente IA · Vivara CDP · {leads.length} oportunidades personalizadas para você atender hoje.
           </p>
         </div>
       </header>

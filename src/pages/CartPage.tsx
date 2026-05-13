@@ -19,6 +19,7 @@ import { loyaltyAccounts, POINT_TO_BRL } from '@/data/extendedMocks';
 import { formatBRL, formatBRLDecimal } from '@/utils/format';
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { EmptyState } from '@/components/EmptyState';
+import { SmartBagSuggestions } from '@/components/SmartBagSuggestions';
 import { useTenantPath } from '@/presentation/hooks/useTenantPath';
 
 export function CartPage() {
@@ -56,7 +57,7 @@ export function CartPage() {
         <EmptyState
           illustration="cart"
           title="Carrinho vazio"
-          description="Inicie a jornada navegando pelo catálogo, identificando o cliente Diamond ou abrindo a sugestão da Copilot."
+          description="Inicie a jornada navegando pelo catálogo, identificando o cliente Diamond ou abrindo uma sugestão do Agente IA."
           primaryAction={
             <button onClick={() => navigate(tp('/catalogo'))} className="btn-primary">
               <Search size={14} aria-hidden="true" /> Ir ao catálogo
@@ -242,6 +243,9 @@ export function CartPage() {
           </div>
         </section>
       )}
+
+      {/* Sacola Inteligente · Agente IA · cross-sell em tempo real */}
+      <SmartBagSuggestions />
 
       {/* Itens */}
       <section className="card">

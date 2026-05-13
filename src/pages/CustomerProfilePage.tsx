@@ -23,7 +23,14 @@ import {
   Minus,
   ArrowRight,
 } from 'lucide-react';
-import { customers, getCustomerById, getProductById, orders } from '@/data/mocks';
+import {
+  customers,
+  getCustomerById,
+  getCustomerIntentBriefing,
+  getProductById,
+  orders,
+  getProductBySku,
+} from '@/data/mocks';
 import { customerInteractions, loyaltyAccounts } from '@/data/extendedMocks';
 import type { CustomerInteraction } from '@/data/extendedMocks';
 import { ProductCard } from '@/components/ProductCard';
@@ -235,6 +242,96 @@ export function CustomerProfilePage() {
         ))}
       </section>
 
+      {/* Briefing Agente IA · intent prediction · 5s de leitura */}
+      {(() => {
+        const briefing = getCustomerIntentBriefing(customer);
+        const anchor = briefing.anchorSku ? getProductBySku(briefing.anchorSku) : undefined;
+        const confidenceTone =
+          briefing.confidence >= 85
+            ? 'text-success bg-success/15'
+            : briefing.confidence >= 70
+              ? 'text-coral-500 bg-coral-50'
+              : 'text-amber-700 bg-amber-50';
+        return (
+          <section
+            aria-label="Briefing pré-atendimento gerado pelo Agente IA"
+            className="card p-5 md:p-6 border-2 border-coral-200 bg-gradient-to-br from-white via-coral-50 to-white"
+          >
+            <header className="flex items-start justify-between gap-3 flex-wrap mb-3">
+              <div>
+                <div className="text-[10px] uppercase tracking-label font-bold text-coral-500 mb-1 flex items-center gap-2">
+                  <Sparkles size={12} aria-hidden="true" />
+                  Agente IA · briefing pré-atendimento
+                </div>
+                <h2 className="font-serif text-xl md:text-2xl font-semibold text-ink-7 leading-tight">
+                  {briefing.headline}
+                </h2>
+              </div>
+              <div className="flex flex-col items-end gap-1">
+                <span
+                  className={clsx(
+                    'inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] uppercase tracking-cta font-bold',
+                    confidenceTone,
+                  )}
+                  aria-label={`Confiança do modelo · ${briefing.confidence}%`}
+                >
+                  <Activity size={11} aria-hidden="true" />
+                  {briefing.confidence}% confiança
+                </span>
+                <span className="text-[9px] uppercase tracking-cta text-ink-5">
+                  {briefing.agentRole}
+                </span>
+              </div>
+            </header>
+
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 items-start">
+              <div>
+                <div className="text-[11px] uppercase tracking-label font-bold text-ink-5 mb-1.5">
+                  Próxima ação sugerida
+                </div>
+                <p className="text-sm text-ink-7 leading-relaxed mb-3">
+                  {briefing.nextAction}
+                </p>
+
+                <div className="text-[11px] uppercase tracking-label font-bold text-ink-5 mb-1.5">
+                  Sinais detectados
+                </div>
+                <ul className="text-[12px] text-ink-6 space-y-1" role="list">
+                  {briefing.signals.map((s) => (
+                    <li key={s} className="flex gap-2">
+                      <span aria-hidden="true" className="text-coral-500">·</span>
+                      <span>{s}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {anchor && (
+                <div className="border border-border bg-white p-3 max-w-[200px]">
+                  <div className="text-[9px] uppercase tracking-cta font-bold text-coral-500 mb-1">
+                    Peça-âncora sugerida
+                  </div>
+                  <div className="aspect-square bg-ink-1 mb-2">
+                    <img
+                      src={anchor.imageUrl}
+                      alt={anchor.imageAlt ?? anchor.name}
+                      loading="lazy"
+                      className="w-full h-full object-contain p-2"
+                    />
+                  </div>
+                  <div className="font-serif text-[12px] font-semibold text-ink-7 leading-tight mb-1 line-clamp-2">
+                    {anchor.name}
+                  </div>
+                  <div className="font-mono text-[11px] text-coral-500 font-bold">
+                    {formatBRL(anchor.price)}
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+        );
+      })()}
+
       {/* Sacola da venda · sessão de atendimento ativa */}
       <section
         aria-label="Sacola da venda em andamento"
@@ -387,14 +484,16 @@ export function CustomerProfilePage() {
           <Link2 size={20} />
         </div>
         <div className="flex-1 min-w-[220px]">
-          <div className="text-[10px] uppercase tracking-label font-bold text-coral-500 mb-1">
-            CDP · Cross-channel
+          <div className="text-[10px] uppercase tracking-label font-bold text-coral-500 mb-1 inline-flex items-center gap-1.5">
+            <Sparkles size={11} aria-hidden="true" />
+            Agente IA · Cross-Channel Unifier
           </div>
           <h3 className="font-serif text-lg md:text-xl text-ink-7">
             3 identidades pendentes de mesclagem
           </h3>
           <p className="text-[12px] text-ink-5 mt-1">
-            Detectamos atividade no e-commerce, app e WhatsApp · revise os matches antes de unificar.
+            Detectamos atividade no e-commerce, app e WhatsApp · o Agente IA já correlacionou os
+            pontos de contato e propõe a fusão · você só precisa revisar e confirmar.
           </p>
         </div>
         <button type="button" onClick={() => setMergeOpen(true)} className="btn-primary">
@@ -406,10 +505,16 @@ export function CustomerProfilePage() {
       {interactions.length > 0 && (
         <section>
           <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
-            <h2 className="heading-serif text-fluid-h3 flex items-center gap-2">
-              <Activity size={18} className="text-coral-500" aria-hidden="true" />
-              Timeline · cross-channel
-            </h2>
+            <div>
+              <h2 className="heading-serif text-fluid-h3 flex items-center gap-2">
+                <Activity size={18} className="text-coral-500" aria-hidden="true" />
+                Timeline · cross-channel
+              </h2>
+              <span className="text-[10px] uppercase tracking-cta font-bold text-ink-5 inline-flex items-center gap-1.5 mt-1">
+                <Sparkles size={10} className="text-coral-500" aria-hidden="true" />
+                Identidade unificada pelo Agente IA · {interactions.length} pontos de contato
+              </span>
+            </div>
             <span className="text-[11px] uppercase tracking-cta font-bold text-ink-5">
               {interactions.length} interações
             </span>
@@ -474,7 +579,7 @@ export function CustomerProfilePage() {
           via WhatsApp Business com peça da wishlist e oferta exclusiva (margem otimizada).
         </p>
         <div className="flex gap-3">
-          <button className="btn-primary">Disparar ação Copilot</button>
+          <button className="btn-primary">Disparar ação Agente IA</button>
           <button className="btn-secondary border-white text-white hover:bg-white hover:text-ink-7">Ver razão do modelo</button>
         </div>
       </section>
