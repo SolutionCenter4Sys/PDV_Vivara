@@ -1,10 +1,24 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Calendar, TrendingUp, Sparkles, ArrowRight } from 'lucide-react';
+import {
+  Search,
+  Calendar,
+  TrendingUp,
+  Sparkles,
+  ArrowRight,
+  ScanFace,
+  IdCard,
+  QrCode,
+  ShieldCheck,
+} from 'lucide-react';
 import { products, customers } from '@/data/mocks';
 import { ProductCard } from '@/components/ProductCard';
 import { CustomerCard } from '@/components/CustomerCard';
 import { RecommendationsCard } from '@/components/RecommendationsCard';
+import {
+  CustomerQuickScanDialog,
+  type ScanInitialPanel,
+} from '@/components/CustomerQuickScanDialog';
 import { usePosStore } from '@/store/usePosStore';
 import { useTenantPath } from '@/presentation/hooks/useTenantPath';
 import { formatBRL, formatPercent } from '@/utils/format';
@@ -13,10 +27,17 @@ export function HomePage() {
   const navigate = useNavigate();
   const tp = useTenantPath();
   const [query, setQuery] = useState('');
+  const [scanOpen, setScanOpen] = useState(false);
+  const [scanInitialPanel, setScanInitialPanel] = useState<ScanInitialPanel>(null);
   const seller = usePosStore(s => s.seller);
   const activeCustomer = usePosStore(s => s.activeCustomer);
   const recommendedProducts = products.filter(p => p.tag === 'bestseller').slice(0, 4);
   const recentCustomers = customers.slice(0, 4);
+
+  const openScan = (panel: ScanInitialPanel) => {
+    setScanInitialPanel(panel);
+    setScanOpen(true);
+  };
 
   const handleQuickSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,6 +107,93 @@ export function HomePage() {
           <CustomerCard customer={activeCustomer} />
         </section>
       )}
+
+      {/* Identificar cliente · 3 caminhos curados (só sem cliente ativo) */}
+      {!activeCustomer && (
+        <section
+          aria-label="Identificar cliente"
+          className="bg-gradient-to-br from-white via-coral-50/60 to-white border-2 border-coral-200 p-5 md:p-6 reveal"
+        >
+          <header className="flex items-start justify-between gap-3 flex-wrap mb-4">
+            <div>
+              <div className="text-[11px] uppercase tracking-label text-coral-500 font-bold mb-2 inline-flex items-center gap-2">
+                <Sparkles size={12} aria-hidden="true" />
+                Comece a sessão de atendimento
+              </div>
+              <h2 className="heading-serif text-fluid-h2">
+                Identifique <em className="text-coral-500">o cliente</em>
+              </h2>
+              <p className="text-ink-5 mt-1 text-[13px] max-w-xl">
+                Em 1 toque o Agente IA carrega Visão 360°, wishlist, briefing pré-atendimento
+                e cross-channel.
+              </p>
+            </div>
+            <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-cta font-bold text-success bg-success/10 px-2 py-1">
+              <ShieldCheck size={11} aria-hidden="true" />
+              LGPD-by-design
+            </span>
+          </header>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <button
+              type="button"
+              onClick={() => openScan('facial')}
+              className="group border border-coral-300 bg-white p-4 text-left flex flex-col gap-2 hover:bg-coral-500 hover:text-white transition min-h-[140px]"
+              aria-label="Identificar por reconhecimento facial"
+            >
+              <span className="inline-flex items-center justify-center w-10 h-10 bg-coral-50 group-hover:bg-white/20 text-coral-500 group-hover:text-white">
+                <ScanFace size={20} aria-hidden="true" />
+              </span>
+              <span className="text-[11px] uppercase tracking-cta font-bold text-coral-500 group-hover:text-white">
+                Reconhecimento facial
+              </span>
+              <span className="text-[12px] leading-snug text-ink-6 group-hover:text-white/90">
+                Olhe para a câmera · embeddings on-device, opt-in biométrico.
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => openScan('cpf')}
+              className="group border border-coral-300 bg-white p-4 text-left flex flex-col gap-2 hover:bg-coral-500 hover:text-white transition min-h-[140px]"
+              aria-label="Identificar por CPF"
+            >
+              <span className="inline-flex items-center justify-center w-10 h-10 bg-coral-50 group-hover:bg-white/20 text-coral-500 group-hover:text-white">
+                <IdCard size={20} aria-hidden="true" />
+              </span>
+              <span className="text-[11px] uppercase tracking-cta font-bold text-coral-500 group-hover:text-white">
+                CPF
+              </span>
+              <span className="text-[12px] leading-snug text-ink-6 group-hover:text-white/90">
+                Validação local + cadastro inline se o cliente ainda não existir.
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => openScan('search')}
+              className="group border border-coral-300 bg-white p-4 text-left flex flex-col gap-2 hover:bg-coral-500 hover:text-white transition min-h-[140px]"
+              aria-label="Identificar por QR ou busca livre"
+            >
+              <span className="inline-flex items-center justify-center w-10 h-10 bg-coral-50 group-hover:bg-white/20 text-coral-500 group-hover:text-white">
+                <QrCode size={20} aria-hidden="true" />
+              </span>
+              <span className="text-[11px] uppercase tracking-cta font-bold text-coral-500 group-hover:text-white">
+                QR / Busca
+              </span>
+              <span className="text-[12px] leading-snug text-ink-6 group-hover:text-white/90">
+                QR Code recebido em WhatsApp ou busca por nome / e-mail.
+              </span>
+            </button>
+          </div>
+        </section>
+      )}
+
+      <CustomerQuickScanDialog
+        open={scanOpen}
+        initialPanel={scanInitialPanel}
+        onClose={() => setScanOpen(false)}
+      />
 
       {/* Quick search · Endless aisle (EP-02-F4) */}
       <section>

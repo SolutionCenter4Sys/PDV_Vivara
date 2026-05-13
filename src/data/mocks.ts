@@ -1376,6 +1376,47 @@ export const getProductBySku = (sku?: string) =>
 export const getProductById = (id?: string) =>
   id ? products.find(p => p.id === id) : undefined;
 
+/**
+ * Busca cliente por CPF (aceita máscara `000.000.000-00` ou só dígitos).
+ * Em produção: integração SERPRO + CDP.
+ */
+export function findCustomerByCpf(cpfRaw?: string): Customer | undefined {
+  if (!cpfRaw) return undefined;
+  const digits = cpfRaw.replace(/\D/g, '');
+  if (digits.length === 0) return undefined;
+  return customers.find((c) => c.cpf.replace(/\D/g, '') === digits);
+}
+
+/**
+ * Mock de match por reconhecimento facial.
+ *
+ * - Sorteia entre clientes com `optInLI: true` (LGPD-by-design — apenas
+ *   clientes que autorizaram processamento biométrico/IA).
+ * - Sorteio determinístico por seed temporal (estável dentro de uma janela
+ *   de 4s, evita re-renders fazerem trocar a "vítima" durante o overlay).
+ * - Confidence simulada entre 87% e 95%, latência 220-480ms.
+ *
+ * Em produção: embeddings on-device + busca em índice vetorial (FAISS) com
+ * threshold de 0.78 cosine + duplo fator (geofence + opt-in CDP).
+ */
+export interface FaceMatchResult {
+  customer: Customer;
+  /** 0..1 (ex.: 0.91 = 91%). */
+  confidence: number;
+  /** Latência simulada em ms (para demo). */
+  latencyMs: number;
+}
+
+export function mockFaceMatch(seed = Math.floor(Date.now() / 4000)): FaceMatchResult | null {
+  const eligible = customers.filter((c) => c.optInLI);
+  if (eligible.length === 0) return null;
+  const idx = seed % eligible.length;
+  const customer = eligible[idx];
+  const confidence = 0.87 + ((seed * 7) % 9) / 100; // 0.87..0.95
+  const latencyMs = 220 + ((seed * 13) % 261); // 220..480
+  return { customer, confidence: Number(confidence.toFixed(2)), latencyMs };
+}
+
 // =====================
 // SACOLA INTELIGENTE · sugestões contextuais em tempo real (Agente IA)
 // =====================

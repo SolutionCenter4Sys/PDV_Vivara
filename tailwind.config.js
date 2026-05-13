@@ -117,10 +117,16 @@ export default {
           '0%, 100%': { boxShadow: '0 0 0 0 rgba(240,135,105,0.6)' },
           '50%': { boxShadow: '0 0 0 12px rgba(240,135,105,0)' },
         },
+        'scan-bar': {
+          '0%': { transform: 'translateY(0)', opacity: '0.9' },
+          '50%': { transform: 'translateY(190px)', opacity: '1' },
+          '100%': { transform: 'translateY(0)', opacity: '0.9' },
+        },
       },
       animation: {
         'fade-in': 'fade-in 0.4s ease-out',
         'pulse-coral': 'pulse-coral 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'scan-bar': 'scan-bar 1.4s ease-in-out infinite',
       },
     },
   },
